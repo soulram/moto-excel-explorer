@@ -1,6 +1,6 @@
 
 import { executeQuery } from '@/lib/db';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { Motorcycle } from '@/lib/types';
 
 // GET all motorcycles

@@ -1,6 +1,6 @@
 
 import { executeQuery } from '@/lib/db';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // GET a specific motorcycle by ID
 export async function GET(

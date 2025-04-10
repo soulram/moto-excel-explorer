@@ -5,6 +5,14 @@ import { Motorcycle } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Edit, Loader2 } from 'lucide-react';
 import EditMotorcycleForm from './EditMotorcycleForm';
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const MotorcycleList = () => {
   const [motorcycles, setMotorcycles] = useState<Motorcycle[]>([]);
@@ -53,8 +61,6 @@ const MotorcycleList = () => {
   
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">List of Motorcycles</h2>
-      
       {isLoading ? (
         <div className="flex justify-center items-center py-10">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -64,45 +70,43 @@ const MotorcycleList = () => {
           <p className="text-muted-foreground">No motorcycles found. Import some from Excel first.</p>
         </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frame Number</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Color</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Factory</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Model</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {motorcycles.map((motorcycle) => (
-                  <tr key={motorcycle.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{motorcycle.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{motorcycle.framenumber}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{motorcycle.color}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{motorcycle.nfacture}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{motorcycle.modele}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{motorcycle.marque}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex items-center gap-1"
-                        onClick={() => handleEditClick(motorcycle)}
-                      >
-                        <Edit className="h-3 w-3" />
-                        Edit
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Frame Number</TableHead>
+                <TableHead>Color</TableHead>
+                <TableHead>Factory</TableHead>
+                <TableHead>Model</TableHead>
+                <TableHead>Brand</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {motorcycles.map((motorcycle) => (
+                <TableRow key={motorcycle.id}>
+                  <TableCell>{motorcycle.id}</TableCell>
+                  <TableCell>{motorcycle.framenumber}</TableCell>
+                  <TableCell>{motorcycle.color}</TableCell>
+                  <TableCell>{motorcycle.nfacture}</TableCell>
+                  <TableCell>{motorcycle.modele}</TableCell>
+                  <TableCell>{motorcycle.marque}</TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                      onClick={() => handleEditClick(motorcycle)}
+                    >
+                      <Edit className="h-3 w-3" />
+                      Edit
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
       
