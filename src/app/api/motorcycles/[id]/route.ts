@@ -1,39 +1,41 @@
 
 import { executeQuery } from '@/lib/db';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/dist/server/web/spec-extension/response';
 
 // GET a specific motorcycle by ID
 export async function GET(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = params.id;
+    const { id } = params;
     
-    const motorcycle = await executeQuery({
+    const motorcycles = await executeQuery({
       query: 'SELECT * FROM immatric WHERE id = ?',
       values: [id],
     });
     
-    if (!motorcycle || (Array.isArray(motorcycle) && motorcycle.length === 0)) {
+    if (!motorcycles || Array.isArray(motorcycles) && motorcycles.length === 0) {
       return NextResponse.json({ error: 'Motorcycle not found' }, { status: 404 });
     }
     
-    return NextResponse.json({ motorcycle: Array.isArray(motorcycle) ? motorcycle[0] : motorcycle });
+    return NextResponse.json({ motorcycle: motorcycles[0] });
   } catch (error) {
     console.error('Failed to fetch motorcycle:', error);
     return NextResponse.json({ error: 'Failed to fetch motorcycle' }, { status: 500 });
   }
 }
 
-// PUT (update) a specific motorcycle
+// UPDATE a specific motorcycle
 export async function PUT(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = params.id;
-    const { framenumber, color, nfacture, modele, marque } = await request.json();
+    const { id } = params;
+    const data = await request.json();
+    
+    const { framenumber, color, nfacture, modele, marque } = data;
     
     const result = await executeQuery({
       query: 'UPDATE immatric SET framenumber = ?, color = ?, nfacture = ?, modele = ?, marque = ? WHERE id = ?',
@@ -49,11 +51,11 @@ export async function PUT(
 
 // DELETE a specific motorcycle
 export async function DELETE(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = params.id;
+    const { id } = params;
     
     const result = await executeQuery({
       query: 'DELETE FROM immatric WHERE id = ?',

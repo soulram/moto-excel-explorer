@@ -3,15 +3,15 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { FileExcel, List, Download } from 'lucide-react';
+import { FileIcon, ListIcon, DownloadIcon } from 'lucide-react';
 
 const Sidebar = () => {
   const pathname = usePathname();
 
   const navItems = [
-    { name: 'Import Excel file', href: '/import', icon: FileExcel },
-    { name: 'List of motorcycles', href: '/motorcycles', icon: List },
-    { name: 'Output', href: '/output', icon: Download },
+    { name: 'Import Excel file', href: '/import', icon: FileIcon },
+    { name: 'List of motorcycles', href: '/motorcycles', icon: ListIcon },
+    { name: 'Output', href: '/output', icon: DownloadIcon },
   ];
 
   return (

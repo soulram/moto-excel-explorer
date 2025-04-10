@@ -4,7 +4,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { FileExcel, List, Download } from 'lucide-react';
+import { FileIcon, ListIcon, DownloadIcon } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -28,7 +28,7 @@ export default function Home() {
             className="w-full flex items-center justify-start gap-2"
             onClick={() => router.push('/import')}
           >
-            <FileExcel className="h-5 w-5" />
+            <FileIcon className="h-5 w-5" />
             Import Excel File
           </Button>
           
@@ -37,7 +37,7 @@ export default function Home() {
             className="w-full flex items-center justify-start gap-2"
             onClick={() => router.push('/motorcycles')}
           >
-            <List className="h-5 w-5" />
+            <ListIcon className="h-5 w-5" />
             List of Motorcycles
           </Button>
           
@@ -46,7 +46,7 @@ export default function Home() {
             className="w-full flex items-center justify-start gap-2"
             onClick={() => router.push('/output')}
           >
-            <Download className="h-5 w-5" />
+            <DownloadIcon className="h-5 w-5" />
             Output
           </Button>
         </div>

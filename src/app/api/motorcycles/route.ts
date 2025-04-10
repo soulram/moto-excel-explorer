@@ -1,6 +1,6 @@
 
 import { executeQuery } from '@/lib/db';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/dist/server/web/spec-extension/response';
 import { Motorcycle } from '@/lib/types';
 
 // GET all motorcycles
@@ -18,7 +18,7 @@ export async function GET() {
 }
 
 // POST new motorcycle
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const motorcycles: Motorcycle[] = await request.json();
     

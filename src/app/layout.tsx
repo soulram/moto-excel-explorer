@@ -1,11 +1,8 @@
 
 import React from 'react';
-import { Inter } from 'next/font/google';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import '../index.css';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export default function RootLayout({
   children,
@@ -18,7 +15,7 @@ export default function RootLayout({
         <title>Motorcycle Database</title>
         <meta name="description" content="Motorcycle Database Management System" />
       </head>
-      <body className={inter.className}>
+      <body>
         {children}
         <Toaster />
         <Sonner />
