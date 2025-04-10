@@ -1,12 +1,11 @@
 
 import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { FileIcon, ListIcon, DownloadIcon } from 'lucide-react';
 
 const Sidebar = () => {
-  const pathname = usePathname();
+  const location = useLocation();
 
   const navItems = [
     { name: 'Import Excel file', href: '/import', icon: FileIcon },
@@ -21,11 +20,11 @@ const Sidebar = () => {
       </div>
       <nav className="flex-1 space-y-1 px-3 py-2">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = location.pathname === item.href;
           return (
             <Link
               key={item.href}
-              href={item.href}
+              to={item.href}
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 isActive ? "bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-foreground"
