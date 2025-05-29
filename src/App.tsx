@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +7,8 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Import from "./pages/Import";
 import Motorcycles from "./pages/Motorcycles";
+import Login from "./pages/Login";
+import PrivateRoute from "./components/PrivateRoute";
 
 const queryClient = new QueryClient();
 
@@ -18,11 +19,31 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/import" element={<Import />} />
-          <Route path="/motorcycles" element={<Motorcycles />} />
-          <Route path="/output" element={<Navigate to="/output" />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/import"
+            element={
+              <PrivateRoute>
+                <Import />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/motorcycles"
+            element={
+              <PrivateRoute>
+                <Motorcycles />
+              </PrivateRoute>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
