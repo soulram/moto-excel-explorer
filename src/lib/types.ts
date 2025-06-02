@@ -1,19 +1,31 @@
-
 export interface Motorcycle {
-  id?: number;
-  framenumber: string;
-  color: string;
-  nfacture: string;
-  modele: string;
-  marque: string;
+  FrameNumber: string;
+  Color: string;
+  NFacture: string;
+  MODELE: string;
+  Marque: string;
+  revendeur: string | null;
+  client: string | null;
+  DateArrivage: string | null;        // YYYY-MM-DD HH:MM:SS
+  DateVenteRevendeur: string | null;  // YYYY-MM-DD HH:MM:SS
+  DateVenteClient: string | null;     // YYYY-MM-DD HH:MM:SS
+  DateNaissance: string | null;       // YYYY-MM-DD HH:MM:SS
+  cnie: string | null;
+  observation: string | null;
+  Sexe: string | null;
+  VilleVente: string | null;
+  ProvinceVente: string | null;
+  VilleAffectation: string | null;
+  ProvinceAffectation: string | null;
 }
+
 
 export interface ExcelData {
   vfacture: string;
   vmodele: string;
   vmarque: string;
   motorcycles: {
-    framenumber: string;
-    color: string;
+    FrameNumber: string;
+    Color: string;
   }[];
 }

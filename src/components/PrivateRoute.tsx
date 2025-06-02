@@ -1,19 +1,9 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuthStore } from '@/lib/store';
+import { useAuthStore } from "@/lib/store";
+import { Navigate } from "react-router-dom";
 
-interface PrivateRouteProps {
-  children: React.ReactNode;
-}
-
-const PrivateRoute = ({ children }: PrivateRouteProps) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const location = useLocation();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  return children;
+const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+  const currentUser = useAuthStore(state => state.currentUser);
+  return currentUser ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 export default PrivateRoute;

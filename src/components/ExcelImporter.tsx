@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useDropzone } from 'react-dropzone';
@@ -29,7 +28,7 @@ const ExcelImporter = () => {
         const vmarque = worksheet['F4']?.v?.toString() || '';
         
         // Extract motorcycle data (starting from row 7)
-        const motorcycles: { framenumber: string; color: string }[] = [];
+        const motorcycles: { FrameNumber: string; Color: string }[] = [];
         let rowIndex = 7;
         
         while (true) {
@@ -41,8 +40,8 @@ const ExcelImporter = () => {
           }
           
           motorcycles.push({
-            framenumber: framenumberCell.v?.toString() || '',
-            color: colorCell.v?.toString() || '',
+            FrameNumber: framenumberCell.v?.toString() || '',
+            Color: colorCell.v?.toString() || ''
           });
           
           rowIndex++;
@@ -105,38 +104,60 @@ const ExcelImporter = () => {
     try {
       // Format the data for saving to the database
       const motorcycleData: Motorcycle[] = excelData.motorcycles.map((m) => ({
-        framenumber: m.framenumber,
-        color: m.color,
-        nfacture: excelData.vfacture,
-        modele: excelData.vmodele,
-        marque: excelData.vmarque,
+        FrameNumber: m.FrameNumber,
+        Color: m.Color,
+        NFacture: excelData.vfacture,
+        MODELE: excelData.vmodele,
+        Marque: excelData.vmarque,
+        DateArrivage: new Date().toLocaleDateString('fr-FR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit'
+        }),
+        revendeur: null,
+        client: null,
+        DateVenteRevendeur: null,
+        DateVenteClient: null,
+        cnie: null,
+        observation: null,
+        DateNaissance: null,
+        Sexe: null,
+        VilleVente: null,
+        ProvinceVente: null,
+        VilleAffectation: null,
+        ProvinceAffectation: null
       }));
+
+      console.log('Sending data:', motorcycleData); // Debug log
       
-      // Save to database
-      const response = await fetch('/api/motorcycles', {
+      const response = await fetch('http://localhost:5000/api/motorcycles', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(motorcycleData),
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to save motorcycles to database');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save motorcycles to database');
       }
       
       const result = await response.json();
+      console.log('Response:', result); // Debug log
       
       toast({
         title: 'Success',
         description: `Successfully imported ${motorcycleData.length} motorcycles into the database.`,
       });
+      
+      setExcelData(null);
     } catch (error) {
       console.error('Error saving to database:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to save motorcycles to database.',
+        description: error instanceof Error ? error.message : 'Failed to save motorcycles to database.',
       });
     } finally {
       setIsLoading(false);
@@ -144,7 +165,6 @@ const ExcelImporter = () => {
   };
   
   const downloadSampleExcel = () => {
-    // Create a sample Excel file
     const workbook = XLSX.utils.book_new();
     const data = [
       ['', '', '', '', '', ''],
@@ -160,8 +180,6 @@ const ExcelImporter = () => {
     
     const worksheet = XLSX.utils.aoa_to_sheet(data);
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sample');
-    
-    // Convert to blob and trigger download
     XLSX.writeFile(workbook, 'sample_import.xlsx');
   };
   
@@ -226,8 +244,8 @@ const ExcelImporter = () => {
                 <tbody className="divide-y divide-gray-200">
                   {excelData.motorcycles.map((moto, index) => (
                     <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">{moto.framenumber}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">{moto.color}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">{moto.FrameNumber}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">{moto.Color}</td>
                     </tr>
                   ))}
                 </tbody>

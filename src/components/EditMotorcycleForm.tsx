@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Motorcycle } from '../lib/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -6,6 +6,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '@/components/ui/label';
 import * as XLSX from 'xlsx';
+import { AuthContext } from '@/contexts/AuthContext'; // <-- Add this line
 
 interface EditMotorcycleFormProps {
   motorcycle: Motorcycle;
@@ -17,8 +18,10 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
   const [formData, setFormData] = useState<Motorcycle>({ ...motorcycle });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { currentUser } = useContext(AuthContext); // <-- Add this line
 
-  // Convert GMT date to YYYY-MM-DD for input (inchangé)
+  // ... (all your unchanged helper functions)
+
   const formatDateForInput = (dateStr: string | null): string => {
     if (!dateStr) return '';
     try {
@@ -30,7 +33,6 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
     }
   };
 
-  // Convert GMT date to DD/MM/YYYY for display (inchangé)
   const formatDateForDisplay = (dateStr: string | null): string => {
     if (!dateStr) return '';
     try {
@@ -45,7 +47,6 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
     }
   };
 
-  // Nouvelle fonction pour formater une date ISO ou autre en dd/mm/yyyy
   const formatDateToDDMMYYYY = (dateStr: string | null): string => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
@@ -56,7 +57,6 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
     return `${day}/${month}/${year}`;
   };
 
-  // Convert date input to UTC format for database (inchangé)
   const formatDateForDatabase = (dateStr: string): string => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
@@ -67,7 +67,6 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
     const { name, value } = e.target;
 
     if (['DateArrivage', 'DateVenteRevendeur', 'DateVenteClient', 'DateNaissance'].includes(name)) {
-      // On garde la conversion en UTC ISO pour l'input date
       const formattedValue = value ? formatDateForDatabase(value) : null;
       setFormData(prev => ({
         ...prev,
@@ -86,7 +85,6 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
     setIsLoading(true);
 
     try {
-      // On prépare les données à envoyer en format dd/mm/yyyy pour les dates
       const dataToSend = {
         ...formData,
         DateArrivage: formatDateToDDMMYYYY(formData.DateArrivage),
@@ -94,8 +92,6 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
         DateVenteClient: formatDateToDDMMYYYY(formData.DateVenteClient),
         DateNaissance: formatDateToDDMMYYYY(formData.DateNaissance),
       };
-
-      console.log('Submitting data:', dataToSend);
 
       const response = await fetch(`http://localhost:5000/api/motorcycles/${motorcycle.FrameNumber}`, {
         method: 'PUT',
@@ -117,7 +113,6 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
 
       onSave();
     } catch (error) {
-      console.error('Error updating motorcycle:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -129,7 +124,6 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
   };
 
   const exportToExcel = () => {
-    // Create a copy of the data with formatted dates for Excel
     const exportData = {
       ...formData,
       DateArrivage: formData.DateArrivage ? formatDateForDisplay(formData.DateArrivage) : '',
@@ -153,7 +147,7 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            {/* ... autres champs inchangés ... */}
+            {/* ... your form fields ... */}
 
             <div className="space-y-2">
               <Label htmlFor="DateArrivage">Arrival Date</Label>
@@ -210,6 +204,7 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
                 {formData.DateNaissance ? formatDateForDisplay(formData.DateNaissance) : 'No date selected'}
               </div>
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="Sexe">Gender</Label>
               <Input
@@ -260,7 +255,7 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
                 placeholder="Enter assigned province"
               />
             </div>
-            {/* ... autres champs inchangés ... */}
+            {/* ... other fields as needed ... */}
           </div>
 
           <DialogFooter className="flex justify-between sm:justify-between">
@@ -272,10 +267,18 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
                 Cancel
               </Button>
             </div>
-            <Button type="submit" disabled={isLoading}>
+            <Button
+              type="submit"
+              disabled={isLoading || currentUser?.droit === 'consul'} // <-- Add this line
+            >
               {isLoading ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>
+          {currentUser?.droit === 'consul' && (
+            <div className="text-xs text-red-500 mt-2">
+              You do not have permission to save changes.
+            </div>
+          )}
         </form>
       </DialogContent>
     </Dialog>
