@@ -29,19 +29,71 @@ export async function POST(request: Request) {
     const results = [];
     
     for (const motorcycle of motorcycles) {
-      const { framenumber, color, nfacture, modele, marque } = motorcycle;
+      const { 
+        FrameNumber,
+        Marque,
+        DateArrivage,
+        MODELE,
+        NFacture,
+        Color,
+        revendeur,
+        client,
+        DateVenteRevendeur,
+        DateVenteClient,
+        cnie,
+        observation,
+        DateNaissance,
+        Sexe,
+        VilleVente,
+        ProvinceVente,
+        VilleAffectation,
+        ProvinceAffectation
+      } = motorcycle;
       
       const result = await executeQuery({
-        query: 'INSERT INTO immatric (framenumber, color, nfacture, modele, marque) VALUES (?, ?, ?, ?, ?)',
-        values: [framenumber, color, nfacture, modele, marque],
+        query: `
+          INSERT INTO immatric (
+            FrameNumber, Marque, DateArrivage, MODELE, NFacture,
+            Color, revendeur, client, DateVenteRevendeur, DateVenteClient,
+            cnie, observation, DateNaissance, Sexe, VilleVente,
+            ProvinceVente, VilleAffectation, ProvinceAffectation
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        values: [
+          FrameNumber,
+          Marque,
+          DateArrivage,
+          MODELE,
+          NFacture,
+          Color,
+          revendeur || null,
+          client || null,
+          DateVenteRevendeur || null,
+          DateVenteClient || null,
+          cnie || null,
+          observation || null,
+          DateNaissance || null,
+          Sexe || null,
+          VilleVente || null,
+          ProvinceVente || null,
+          VilleAffectation || null,
+          ProvinceAffectation || null
+        ],
       });
       
       results.push(result);
     }
     
-    return NextResponse.json({ success: true, results });
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Motorcycles added successfully',
+      results 
+    });
   } catch (error) {
     console.error('Failed to create motorcycles:', error);
-    return NextResponse.json({ error: 'Failed to create motorcycles' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to create motorcycles',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
