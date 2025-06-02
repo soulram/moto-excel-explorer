@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Motorcycle } from '@/lib/types';
+import { Motorcycle } from '../lib/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import { Label } from '@/components/ui/label';
 import * as XLSX from 'xlsx';
 
@@ -18,124 +17,252 @@ const EditMotorcycleForm = ({ motorcycle, onCancel, onSave }: EditMotorcycleForm
   const [formData, setFormData] = useState<Motorcycle>({ ...motorcycle });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  
+
+  // Convert GMT date to YYYY-MM-DD for input (inchangé)
+  const formatDateForInput = (dateStr: string | null): string => {
+    if (!dateStr) return '';
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return '';
+      return date.toISOString().split('T')[0];
+    } catch {
+      return '';
+    }
+  };
+
+  // Convert GMT date to DD/MM/YYYY for display (inchangé)
+  const formatDateForDisplay = (dateStr: string | null): string => {
+    if (!dateStr) return '';
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return '';
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch {
+      return '';
+    }
+  };
+
+  // Nouvelle fonction pour formater une date ISO ou autre en dd/mm/yyyy
+  const formatDateToDDMMYYYY = (dateStr: string | null): string => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Convert date input to UTC format for database (inchangé)
+  const formatDateForDatabase = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toISOString().replace('T', ' ').split('.')[0];
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (['DateArrivage', 'DateVenteRevendeur', 'DateVenteClient', 'DateNaissance'].includes(name)) {
+      // On garde la conversion en UTC ISO pour l'input date
+      const formattedValue = value ? formatDateForDatabase(value) : null;
+      setFormData(prev => ({
+        ...prev,
+        [name]: formattedValue,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value || null,
+      }));
+    }
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      const response = await fetch(`/api/motorcycles/${motorcycle.id}`, {
+      // On prépare les données à envoyer en format dd/mm/yyyy pour les dates
+      const dataToSend = {
+        ...formData,
+        DateArrivage: formatDateToDDMMYYYY(formData.DateArrivage),
+        DateVenteRevendeur: formatDateToDDMMYYYY(formData.DateVenteRevendeur),
+        DateVenteClient: formatDateToDDMMYYYY(formData.DateVenteClient),
+        DateNaissance: formatDateToDDMMYYYY(formData.DateNaissance),
+      };
+
+      console.log('Submitting data:', dataToSend);
+
+      const response = await fetch(`http://localhost:5000/api/motorcycles/${motorcycle.FrameNumber}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to update motorcycle');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update motorcycle');
       }
-      
+
       toast({
         title: 'Success',
         description: 'Motorcycle updated successfully.',
       });
-      
+
       onSave();
     } catch (error) {
       console.error('Error updating motorcycle:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to update motorcycle.',
+        description: error instanceof Error ? error.message : 'Failed to update motorcycle.',
       });
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const exportToExcel = () => {
-    // Create a worksheet with the motorcycle data
-    const worksheet = XLSX.utils.json_to_sheet([formData]);
-    
-    // Create a workbook and append the worksheet
+    // Create a copy of the data with formatted dates for Excel
+    const exportData = {
+      ...formData,
+      DateArrivage: formData.DateArrivage ? formatDateForDisplay(formData.DateArrivage) : '',
+      DateVenteRevendeur: formData.DateVenteRevendeur ? formatDateForDisplay(formData.DateVenteRevendeur) : '',
+      DateVenteClient: formData.DateVenteClient ? formatDateForDisplay(formData.DateVenteClient) : '',
+      DateNaissance: formData.DateNaissance ? formatDateForDisplay(formData.DateNaissance) : '',
+    };
+
+    const worksheet = XLSX.utils.json_to_sheet([exportData]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Motorcycle');
-    
-    // Generate Excel file and trigger download
-    XLSX.writeFile(workbook, `motorcycle_${formData.framenumber}.xlsx`);
+    XLSX.writeFile(workbook, `motorcycle_${formData.FrameNumber}.xlsx`);
   };
-  
+
   return (
     <Dialog open={true} onOpenChange={onCancel}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
           <DialogTitle>Edit Motorcycle</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
+            {/* ... autres champs inchangés ... */}
+
             <div className="space-y-2">
-              <Label htmlFor="framenumber">Frame Number</Label>
+              <Label htmlFor="DateArrivage">Arrival Date</Label>
               <Input
-                id="framenumber"
-                name="framenumber"
-                value={formData.framenumber}
+                id="DateArrivage"
+                name="DateArrivage"
+                type="date"
+                value={formatDateForInput(formData.DateArrivage)}
                 onChange={handleInputChange}
-                required
+              />
+              <div className="text-sm text-gray-500">
+                {formData.DateArrivage ? formatDateForDisplay(formData.DateArrivage) : 'No date selected'}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="DateVenteRevendeur">Dealer Sale Date</Label>
+              <Input
+                id="DateVenteRevendeur"
+                name="DateVenteRevendeur"
+                type="date"
+                value={formatDateForInput(formData.DateVenteRevendeur)}
+                onChange={handleInputChange}
+              />
+              <div className="text-sm text-gray-500">
+                {formData.DateVenteRevendeur ? formatDateForDisplay(formData.DateVenteRevendeur) : 'No date selected'}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="DateVenteClient">Client Sale Date</Label>
+              <Input
+                id="DateVenteClient"
+                name="DateVenteClient"
+                type="date"
+                value={formatDateForInput(formData.DateVenteClient)}
+                onChange={handleInputChange}
+              />
+              <div className="text-sm text-gray-500">
+                {formData.DateVenteClient ? formatDateForDisplay(formData.DateVenteClient) : 'No date selected'}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="DateNaissance">Birth Date</Label>
+              <Input
+                id="DateNaissance"
+                name="DateNaissance"
+                type="date"
+                value={formatDateForInput(formData.DateNaissance)}
+                onChange={handleInputChange}
+              />
+              <div className="text-sm text-gray-500">
+                {formData.DateNaissance ? formatDateForDisplay(formData.DateNaissance) : 'No date selected'}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="Sexe">Gender</Label>
+              <Input
+                id="Sexe"
+                name="Sexe"
+                value={formData.Sexe || ''}
+                onChange={handleInputChange}
+                placeholder="Enter gender"
               />
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="color">Color</Label>
+              <Label htmlFor="VilleVente">Sale City</Label>
               <Input
-                id="color"
-                name="color"
-                value={formData.color}
+                id="VilleVente"
+                name="VilleVente"
+                value={formData.VilleVente || ''}
                 onChange={handleInputChange}
-                required
+                placeholder="Enter sale city"
               />
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="nfacture">Factory</Label>
+              <Label htmlFor="ProvinceVente">Sale Province</Label>
               <Input
-                id="nfacture"
-                name="nfacture"
-                value={formData.nfacture}
+                id="ProvinceVente"
+                name="ProvinceVente"
+                value={formData.ProvinceVente || ''}
                 onChange={handleInputChange}
-                required
+                placeholder="Enter sale province"
               />
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="modele">Model</Label>
+              <Label htmlFor="VilleAffectation">Assigned City</Label>
               <Input
-                id="modele"
-                name="modele"
-                value={formData.modele}
+                id="VilleAffectation"
+                name="VilleAffectation"
+                value={formData.VilleAffectation || ''}
                 onChange={handleInputChange}
-                required
+                placeholder="Enter assigned city"
               />
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="marque">Brand</Label>
+              <Label htmlFor="ProvinceAffectation">Assigned Province</Label>
               <Input
-                id="marque"
-                name="marque"
-                value={formData.marque}
+                id="ProvinceAffectation"
+                name="ProvinceAffectation"
+                value={formData.ProvinceAffectation || ''}
                 onChange={handleInputChange}
-                required
+                placeholder="Enter assigned province"
               />
             </div>
+            {/* ... autres champs inchangés ... */}
           </div>
-          
+
           <DialogFooter className="flex justify-between sm:justify-between">
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={exportToExcel}>
