@@ -5,6 +5,7 @@ interface AuthState {
   isAuthenticated: boolean;
   user: {
     username: string;
+    droit?: string;
   } | null;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
@@ -16,12 +17,24 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       user: null,
       login: async (username: string, password: string) => {
-        // In a real app, you would validate credentials against your backend
-        if (username === 'admin' && password === 'password') {
-          set({ isAuthenticated: true, user: { username } });
-          return true;
+        try {
+          const response = await fetch('http://localhost:5000/api/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ login: username, password }),
+          });
+          if (!response.ok) return false;
+          const data = await response.json();
+          if (data.success) {
+            set({ isAuthenticated: true, user: { username: data.user.login, droit: data.user.droit } });
+            return true;
+          }
+          return false;
+        } catch (err) {
+          return false;
         }
-        return false;
       },
       logout: () => {
         set({ isAuthenticated: false, user: null });
