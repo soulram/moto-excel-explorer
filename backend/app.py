@@ -5,6 +5,8 @@ import os
 from models import db, Motorcycle,User  # <-- Import db and Motorcycle model
 from datetime import datetime
 from dateutil import parser
+from api.provinces import bp as provinces_bp
+
 # Initialize Flask app and CORS (only one call needed)
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins
@@ -17,7 +19,7 @@ app.config['DEBUG'] = True
 
 # Initialize the db object
 db.init_app(app)
-
+app.register_blueprint(provinces_bp)
 # Create all tables (if they don't exist)
 with app.app_context():
     db.create_all()
@@ -29,14 +31,16 @@ def index():
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
-    email = data.get('email')
+    print("Received data:", data)  # Debug: see the actual keys
+    login_name = data.get('login')
     password = data.get('password')
-    # Replace with your actual authentication logic
-    if email == 'user@example.com' and password == 'password123':
-        # Optionally set a session or token here
-        return jsonify({"success": True}), 200
+    user = User.query.filter_by(login=login_name).first()
+    print("User:", user)  # Debug: check if user is found
+    if user and user.password == password:
+        return jsonify({"user": {"login": user.login, "droit": user.droit}}), 200
     else:
         return jsonify({"error": "Invalid credentials"}), 401
+
 
 
 # Route for fetching all motorcycles
@@ -143,6 +147,7 @@ def add_motorcycles():
         db.session.rollback()
         app.logger.error(f"Error saving motorcycles: {e}")
         return jsonify({"error": str(e)}), 500
+ 
 
 @app.route('/api/motorcycles/<string:framenumber>', methods=['PUT'])
 def update_motorcycle(framenumber):
@@ -158,7 +163,7 @@ def update_motorcycle(framenumber):
                     # Convert from DD/MM/YY to YYYY-MM-DD
                     try:
                         date_obj = parser.parse(data[field])
-                        data[field] = date_obj.strftime('%d/%m/%y')
+                        data[field] = date_obj.strftime('%y/%m/%d')
                     except (ValueError, TypeError) as e:
                         print(f"Error parsing date: {e}")
                         date_obj = datetime.strptime(data[field], '%d/%m/%y')
@@ -188,3 +193,4 @@ def update_motorcycle(framenumber):
 # Start the server
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
+
