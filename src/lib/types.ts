@@ -24,6 +24,7 @@ export interface ExcelData {
   vfacture: string;
   vmodele: string;
   vmarque: string;
+  vdatearrivage: string;
   motorcycles: {
     FrameNumber: string;
     Color: string;

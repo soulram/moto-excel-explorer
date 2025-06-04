@@ -1,4 +1,3 @@
-
 import mysql from 'mysql2/promise';
 
 // Connection pool to MySQL database

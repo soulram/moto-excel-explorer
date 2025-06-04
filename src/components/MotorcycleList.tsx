@@ -82,7 +82,7 @@ const MotorcycleList = () => {
       <div className="flex justify-end mb-2">
         <input
           type="text"
-          placeholder="Filter by Frame Number or Client"
+          placeholder="Filtrer N°Chassis ou Client"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="border rounded px-3 py-2 w-full max-w-xs"
@@ -101,16 +101,16 @@ const MotorcycleList = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Frame Number</TableHead>
-                <TableHead>Brand</TableHead>
-                <TableHead>Model</TableHead>
-                <TableHead>Color</TableHead>
-                <TableHead>Factory</TableHead>
-                <TableHead>Dealer</TableHead>
+                <TableHead>N°Chassis</TableHead>
+                <TableHead>Marque</TableHead>
+                <TableHead>Modele</TableHead>
+                <TableHead>Coleur</TableHead>
+                <TableHead>Facture</TableHead>
+                <TableHead>Revendeur</TableHead>
                 <TableHead>Client</TableHead>
-                <TableHead>Arrival Date</TableHead>
-                <TableHead>Dealer Sale Date</TableHead>
-                <TableHead>Client Sale Date</TableHead>
+                <TableHead>Date Arrivage</TableHead>
+                <TableHead>Date Vente Revendeur</TableHead>
+                <TableHead>Date Vente client</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>

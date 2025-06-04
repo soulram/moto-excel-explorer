@@ -7,7 +7,7 @@ const Motorcycles = () => {
   return (
     <Layout>
       <div className="p-6">
-        <h1 className="text-3xl font-bold mb-6">Motorcycle List</h1>
+        <h1 className="text-3xl font-bold mb-6">Liste des Motos</h1>
         <MotorcycleList />
       </div>
     </Layout>

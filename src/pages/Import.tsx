@@ -7,7 +7,7 @@ const Import = () => {
   return (
     <Layout>
       <div className="p-6">
-        <h1 className="text-3xl font-bold mb-6">Import Excel Data</h1>
+        <h1 className="text-3xl font-bold mb-6">Importer Excel</h1>
         <ExcelImporter />
       </div>
     </Layout>
