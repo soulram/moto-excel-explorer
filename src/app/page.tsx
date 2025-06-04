@@ -10,16 +10,16 @@ export default function Home() {
   const router = useRouter();
   
   useEffect(() => {
-    // Redirect to import page by default
+    // Rediriger vers la page d'importation par défaut
     router.push('/import');
   }, [router]);
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow">
-        <h1 className="text-3xl font-bold text-center">Motorcycle Database</h1>
+        <h1 className="text-3xl font-bold text-center">Base de données motos</h1>
         <p className="text-center text-muted-foreground">
-          Manage your motorcycle database with easy import and export features
+          Gérez votre base de données de motos avec des fonctionnalités simples d'importation et d'exportation
         </p>
         
         <div className="space-y-4">
@@ -29,7 +29,7 @@ export default function Home() {
             onClick={() => router.push('/import')}
           >
             <FileIcon className="h-5 w-5" />
-            Import Excel File
+            Importer un fichier Excel
           </Button>
           
           <Button 
@@ -38,7 +38,7 @@ export default function Home() {
             onClick={() => router.push('/motorcycles')}
           >
             <ListIcon className="h-5 w-5" />
-            List of Motorcycles
+            Liste des motos
           </Button>
           
           <Button 
@@ -47,7 +47,7 @@ export default function Home() {
             onClick={() => router.push('/output')}
           >
             <DownloadIcon className="h-5 w-5" />
-            Output
+            Export
           </Button>
         </div>
       </div>
